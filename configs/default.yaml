@@ -2,7 +2,7 @@ env:
   n_other_vessels: 5
 
 train:
-  episodes: 10000
+  episodes: 20
   max_steps: 500
   batch_size: 128
   actor_lr: 1.0e-4
@@ -14,7 +14,7 @@ train:
   policy_freq: 2
 
 logging:
-  save_gif_every_ep: 10
+  save_gif_every_ep: 200
   reward_plot_filename: "episode_rewards_td3.png"
 
 eval:

@@ -147,7 +147,8 @@ def main() -> None:
     save_dir = Path(
         args.save_dir) / f"{args.name.lower().replace(' ', '_')}_{timestamp}"
 
-    env = FishingVesselEnv(n_other_vessels=n_other_vessels)
+    max_episode_steps = int(env_cfg.get("max_episode_steps", 500))
+    env = FishingVesselEnv(n_other_vessels=n_other_vessels, max_episode_steps=max_episode_steps)
 
     state_dim = env.observation_space.shape[0]
     action_dim = env.action_space.shape[0]

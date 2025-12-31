@@ -51,6 +51,10 @@ def train_td3(
 
     global_step = 0
 
+    DIAG_EVERY = 10
+    LOG_LOSS_EVERY = 50
+    UPDATE_EVERY = 2
+
     for episode in range(episodes):
         state, _info = env.reset()
         total_reward = 0.0
@@ -80,30 +84,33 @@ def train_td3(
                                      done)
 
             # update
-            result = agent.train(batch_size=batch_size)
-            if result is not None:
+            result = None
+            if global_step % UPDATE_EVERY == 0:
+                result = agent.train(batch_size=batch_size)
+            if result is not None and (global_step % LOG_LOSS_EVERY == 0):
                 actor_loss, critic_loss = result
                 if actor_loss is not None:
                     writer.add_scalar("Loss/Actor", actor_loss, global_step)
                 writer.add_scalar("Loss/Critic", critic_loss, global_step)
 
             # diagnostics
-            speeds.append(float(env.velocity))
+            if step % DIAG_EVERY == 0:
+                speeds.append(float(env.velocity))
 
-            heading_change = abs(float(env.heading) - prev_heading)
-            heading_changes.append(heading_change)
-            prev_heading = float(env.heading)
+                heading_change = abs(float(env.heading) - prev_heading)
+                heading_changes.append(heading_change)
+                prev_heading = float(env.heading)
 
-            dist_to_goal = float(np.linalg.norm(env.goal - env.position))
-            distances_to_goal.append(dist_to_goal)
+                dist_to_goal = float(np.linalg.norm(env.goal - env.position))
+                distances_to_goal.append(dist_to_goal)
 
-            vessel_distances = [
-                float(np.linalg.norm(env.position - v[0]))
-                for v in env.other_vessels
-            ]
-            if vessel_distances:
-                min_dist_to_vessel.append(float(np.min(vessel_distances)))
-                avg_dist_to_vessels.append(float(np.mean(vessel_distances)))
+                vessel_distances = [
+                    float(np.linalg.norm(env.position - v[0]))
+                    for v in env.other_vessels
+                ]
+                if vessel_distances:
+                    min_dist_to_vessel.append(float(np.min(vessel_distances)))
+                    avg_dist_to_vessels.append(float(np.mean(vessel_distances)))
 
             state = next_state
             total_reward += float(reward)
@@ -213,7 +220,8 @@ def main() -> None:
     run_dir = Path("runs") / f"fishing_td3_{timestamp}"
     gif_dir = Path("gifs") / f"fishing_td3_{timestamp}"
 
-    env = FishingVesselEnv(n_other_vessels=n_other_vessels)
+    max_episode_steps = int(env_cfg.get("max_episode_steps", 500))
+    env = FishingVesselEnv(n_other_vessels=n_other_vessels, max_episode_steps=max_episode_steps)
 
     state_dim = env.observation_space.shape[0]
     action_dim = env.action_space.shape[0]

@@ -83,8 +83,10 @@ def compute_domain_radius(
 class FishingVesselEnv(gym.Env):
     metadata = {"render_modes": ["human"], "render_fps": 30}
 
-    def __init__(self, n_other_vessels: int):
+    def __init__(self, n_other_vessels: int, *, max_episode_steps: int = MAX_EPISODE_STEPS):
         super().__init__()
+
+        self.max_episode_steps = int(max_episode_steps)
 
         self.max_speed: float = DEFAULT_MAX_SPEED
         self.max_turn: float = DEFAULT_MAX_TURN
@@ -237,7 +239,7 @@ class FishingVesselEnv(gym.Env):
         terminated = collision or goal_reached
 
         self.current_step += 1
-        truncated = self.current_step >= MAX_EPISODE_STEPS
+        truncated = self.current_step >= self.max_episode_steps
 
 
         done_reason = "running"
