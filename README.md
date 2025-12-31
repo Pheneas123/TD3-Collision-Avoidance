@@ -29,6 +29,14 @@ This project implements a 2D collision-avoidance task for a fishing vessel navig
 
 Create a virtual environment and install dependencies.
 
+```bash
+python -m venv .venv
+# Windows PowerShell:
+.\.venv\Scripts\Activate.ps1
+
+pip install -e .
+```
+
 Run training with 
 ```
 python scripts/train.py --config configs/default.yaml
@@ -37,14 +45,6 @@ python scripts/train.py --config configs/default.yaml
 Run evaluation with 
 ```
 python scripts/evaluate.py --config configs/default.yaml --actor runs/<*name of run*>/td3_actor.pth --gif
-```
-
-```bash
-python -m venv .venv
-# Windows PowerShell:
-.\.venv\Scripts\Activate.ps1
-
-pip install -e .
 ```
 
 ## Plans
