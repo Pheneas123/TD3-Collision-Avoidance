@@ -2,7 +2,7 @@ env:
   n_other_vessels: 5
 
 train:
-  episodes: 20
+  episodes: 10000
   max_steps: 500
   batch_size: 128
   actor_lr: 1.0e-4
