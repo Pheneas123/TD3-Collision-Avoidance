@@ -2,3 +2,5 @@ runs/
 gifs/
 
 .venv/
+__pycache__/
+*.egg-info/
