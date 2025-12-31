@@ -1,6 +1,6 @@
 # TD3-Collision-Avoidance
 
-Building from DDPG Collision Avoidance.
+Building from [DDPG Collision Avoidance](https://github.com/Pheneas123/DDPG-Collision-Avoidance).
 
 This project implements a 2D collision-avoidance task for a fishing vessel navigating towards a goal while avoiding moving vessels. A TD3 agent is trained in a custom Gymnasium environment.
 
