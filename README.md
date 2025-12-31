@@ -44,3 +44,5 @@ pip install -e .
   - Make predefined classes of vessels that are called, rather than randomly generated
   - Improve their movement pattern and the way they avoid colliding with eachother
 - Curriculum learning, start with fewer vessels and increase over time
+- Fix PyTorch so it selects GPU if compatible one is available
+- Add some randomness to where agent spawns and where goal is
