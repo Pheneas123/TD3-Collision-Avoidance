@@ -44,7 +44,7 @@ python scripts/train.py --config configs/default.yaml
 
 Run evaluation with 
 ```
-python scripts/evaluate.py --config configs/default.yaml --actor runs/<*name of run*>/td3_actor.pth --gif
+python scripts/evaluate.py --config configs/default.yaml --actor runs/*name of run*/td3_actor.pth --gif
 ```
 
 ## Plans
