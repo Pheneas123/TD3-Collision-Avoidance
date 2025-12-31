@@ -3,23 +3,24 @@ from __future__ import annotations
 import argparse
 import datetime
 from pathlib import Path
-from typing import List
+from typing import List, Any
 
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-
+import yaml
 import torch
 
 from td3.env import FishingVesselEnv
 from td3.td3 import TD3Agent
 
 
-# Default
-N_OTHER_VESSELS: int = 5
-N_EVAL_EPISODES: int = 100
-MAX_EVAL_STEPS: int = 500
-SAVE_DIR: str = "eval_outputs"
+def load_config(path: str) -> dict[str, Any]:
+    with open(path, "r", encoding="utf-8") as f:
+        cfg = yaml.safe_load(f)
+    if cfg is None:
+        raise ValueError(f"Config file is empty: {path}")
+    return cfg
 
 
 def seed_everything(seed: int) -> None:
@@ -36,16 +37,15 @@ def policy_evaluation(
     n_eval_episodes: int,
     max_eval_steps: int,
     seed: int,
-    name: str = "",
-    save_dir: str | Path = SAVE_DIR,
-    save_gif: bool = False,
+    name: str,
+    save_dir: Path,
+    save_gif: bool,
 ) -> List[float]:
     success_count = 0
     collision_count = 0
     timeout_count = 0
     episode_rewards: List[float] = []
 
-    save_dir = Path(save_dir)
     save_dir.mkdir(parents=True, exist_ok=True)
 
     desc = f"Evaluating {name}".strip() if name else "Evaluating"
@@ -55,7 +55,9 @@ def policy_evaluation(
         reason = "max steps"
 
         for _step in range(max_eval_steps):
-            action = agent.select_action(state, noise=False, current_episode=ep)
+            action = agent.select_action(state,
+                                         noise=False,
+                                         current_episode=ep)
 
             next_state, reward, terminated, truncated, info = env.step(action)
             total_reward += float(reward)
@@ -89,7 +91,9 @@ def policy_evaluation(
 
     plt.figure(figsize=(12, 6))
     plt.plot(episode_rewards, alpha=0.6, label="Episode Reward")
-    plt.axhline(float(np.mean(episode_rewards)), linestyle="--", label="Mean Reward")
+    plt.axhline(float(np.mean(episode_rewards)),
+                linestyle="--",
+                label="Mean Reward")
     plt.xlabel("Episode")
     plt.ylabel("Total Reward")
     plt.title(f"{name} Evaluation Rewards".strip() or "Evaluation Rewards")
@@ -103,24 +107,47 @@ def policy_evaluation(
 
     return episode_rewards
 
+
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--actor", type=str, default=None, help="Path to td3_actor.pth (optional)")
-    parser.add_argument("--episodes", type=int, default=N_EVAL_EPISODES)
-    parser.add_argument("--max-steps", type=int, default=MAX_EVAL_STEPS)
-    parser.add_argument("--vessels", type=int, default=N_OTHER_VESSELS)
+    parser.add_argument("--config", type=str, default="configs/default.yaml")
+    parser.add_argument("--actor",
+                        type=str,
+                        default=None,
+                        help="Path to td3_actor.pth (optional)")
     parser.add_argument("--name", type=str, default="TD3")
-    parser.add_argument("--save-dir", type=str, default=SAVE_DIR)
-    parser.add_argument("--gif", action="store_true", help="Save a GIF for the first eval episode")
-    parser.add_argument("--seed", type=int, default=0, help="Base seed for deterministic evaluation")
+    parser.add_argument("--save-dir", type=str, default="eval_outputs")
+    parser.add_argument("--gif",
+                        action="store_true",
+                        help="Save a GIF for the first eval episode")
+
+    # fall back to config if not provided
+    parser.add_argument("--episodes", type=int, default=None)
+    parser.add_argument("--max-steps", type=int, default=None)
+    parser.add_argument("--vessels", type=int, default=None)
+    parser.add_argument("--seed", type=int, default=None)
     args = parser.parse_args()
 
-    seed_everything(args.seed)
+    cfg = load_config(args.config)
+
+    env_cfg = cfg.get("env", {})
+    eval_cfg = cfg.get("eval", {})
+
+    n_other_vessels = int(args.vessels if args.vessels is not None else env_cfg
+                          .get("n_other_vessels", 5))
+    n_eval_episodes = int(args.episodes if args.episodes is not None else
+                          eval_cfg.get("episodes", 100))
+    max_eval_steps = int(args.max_steps if args.max_steps is not None else
+                         eval_cfg.get("max_steps", 500))
+    seed = int(args.seed if args.seed is not None else eval_cfg.get("seed", 0))
+
+    seed_everything(seed)
 
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    save_dir = Path(args.save_dir) / f"{args.name.lower().replace(' ', '_')}_{timestamp}"
+    save_dir = Path(
+        args.save_dir) / f"{args.name.lower().replace(' ', '_')}_{timestamp}"
 
-    env = FishingVesselEnv(n_other_vessels=args.vessels)
+    env = FishingVesselEnv(n_other_vessels=n_other_vessels)
 
     state_dim = env.observation_space.shape[0]
     action_dim = env.action_space.shape[0]
@@ -139,9 +166,9 @@ def main() -> None:
     policy_evaluation(
         agent,
         env,
-        n_eval_episodes=args.episodes,
-        max_eval_steps=args.max_steps,
-        seed=args.seed,
+        n_eval_episodes=n_eval_episodes,
+        max_eval_steps=max_eval_steps,
+        seed=seed,
         name=args.name,
         save_dir=save_dir,
         save_gif=args.gif,

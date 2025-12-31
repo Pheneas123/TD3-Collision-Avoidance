@@ -4,3 +4,5 @@ gifs/
 .venv/
 __pycache__/
 *.egg-info/
+
+eval_outputs/

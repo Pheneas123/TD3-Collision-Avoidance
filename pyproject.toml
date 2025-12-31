@@ -6,6 +6,16 @@ build-backend = "setuptools.build_meta"
 name = "td3-collision-avoidance"
 version = "0.0.1"
 requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1.24",
+  "gymnasium>=0.29",
+  "matplotlib>=3.7",
+  "pillow>=10.0",
+  "tqdm>=4.66",
+  "tensorboard>=2.14",
+  "torch>=2.1",
+  "pyyaml>=6.0",
+]
 
 [tool.setuptools]
 package-dir = {"" = "src"}
