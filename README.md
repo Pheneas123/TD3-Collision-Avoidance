@@ -35,3 +35,12 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 
 pip install -e .
+```
+
+## Plans
+
+- Vectorise calculating reward to try speed up training
+- Improve other vessels
+  - Make predefined classes of vessels that are called, rather than randomly generated
+  - Improve their movement pattern and the way they avoid colliding with eachother
+- Curriculum learning, start with fewer vessels and increase over time
