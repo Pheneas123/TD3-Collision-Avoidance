@@ -19,7 +19,7 @@ This project implements a 2D collision-avoidance task for a fishing vessel navig
   - `train.py`  
     Training entry-point, TensorBoard logging, reward curve saving, periodic GIF export.
   - `evaluate.py`  
-    (If present) deterministic evaluation / rollouts.
+    Deterministic evaluation / rollouts.
 - `runs/`  
   TensorBoard logs + saved models (gitignored).
 - `gifs/`  
